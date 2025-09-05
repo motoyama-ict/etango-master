@@ -390,7 +390,17 @@
                     body: JSON.stringify({
                         contents: [{ parts: [{ text: userQuery }] }],
                         systemInstruction: { parts: [{ text: systemPrompt }] },
-                        generationConfig: { responseMimeType: "application/json" }
+                        generationConfig: {
+                            responseMimeType: "application/json",
+                            responseSchema: {
+                                type: "OBJECT",
+                                properties: {
+                                    en: { type: "STRING" },
+                                    ja: { type: "STRING" }
+                                },
+                                required: ["en", "ja"]
+                            }
+                        }
                     })
                 });
                 if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
@@ -503,4 +513,5 @@
     </script>
 </body>
 </html>
+
 
