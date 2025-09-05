@@ -75,7 +75,7 @@
         <div id="home-screen" class="screen active p-6 flex-grow flex flex-col">
             <header class="text-center mb-8">
                 <h1 class="text-3xl font-bold text-sky-600">英単語マスター</h1>
-                <p class="text-slate-500 mt-1">中学英単語 1200 with AI</p>
+                <p class="text-slate-500 mt-1">中学英単語 1200</p>
             </header>
             <main class="flex-grow space-y-4 flex flex-col justify-center">
                 <button onclick="startQuiz(1)" class="btn w-full text-lg font-bold text-white bg-sky-500 hover:bg-sky-600 p-4 rounded-xl shadow-md">
@@ -149,14 +149,9 @@
             <button onclick="closeModal('example-modal')" class="absolute top-2 right-2 text-slate-400 hover:text-slate-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0-0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
-            <h3 class="text-xl font-bold text-sky-600 mb-4">AI先生の例文<span id="example-word-title"></span></h3>
+            <h3 class="text-xl font-bold text-sky-600 mb-4">先生からの例文<span id="example-word-title"></span></h3>
             <div id="example-content" class="space-y-4">
-                <!-- ローディングスピナー -->
-                <div id="example-loader" class="flex justify-center items-center h-24">
-                     <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-500"></div>
-                </div>
-                <!-- 生成された例文 -->
-                <div id="example-text" class="hidden">
+                <div id="example-text">
                     <p id="example-en" class="text-lg font-semibold"></p>
                     <p id="example-ja" class="text-slate-600 mt-1"></p>
                 </div>
@@ -172,14 +167,43 @@
         // --- 単語データ (一部抜粋) ---
         const allWords = [
             // 中1レベル (Level 1)
-            { en: 'I', ja: '私は', level: 1 }, { en: 'you', ja: 'あなたは', level: 1 }, { en: 'he', ja: '彼は', level: 1 }, { en: 'she', ja: '彼女は', level: 1 }, { en: 'it', ja: 'それは', level: 1 }, { en: 'we', ja: '私たちは', level: 1 }, { en: 'they', ja: '彼らは', level: 1 }, { en: 'this', ja: 'これは', level: 1 }, { en: 'that', ja: 'あれは', level: 1 }, { en: 'am', ja: 'です', level: 1 }, { en: 'are', ja: 'です', level: 1 }, { en: 'is', ja: 'です', level: 1 }, { en: 'my', ja: '私の', level: 1 }, { en: 'your', ja: 'あなたの', level: 1 }, { en: 'his', ja: '彼の', level: 1 }, { en: 'her', ja: '彼女の', level: 1 }, { en: 'a', ja: '一つの', level: 1 }, { en: 'an', ja: '一つの', level: 1 }, { en: 'the', ja: 'その', level: 1 }, { en: 'not', ja: '〜ではない', level: 1 }, { en: 'what', ja: '何', level: 1 }, { en: 'who', ja: '誰', level: 1 }, { en: 'where', ja: 'どこ', level: 1 }, { en: 'when', ja: 'いつ', level: 1 }, { en: 'how', ja: 'どうやって', level: 1 }, { en: 'pen', ja: 'ペン', level: 1 }, { en: 'book', ja: '本', level: 1 }, { en: 'desk', ja: '机', level: 1 }, { en: 'bag', ja: 'かばん', level: 1 }, { en: 'note', ja: 'ノート', level: 1 }, { en: 'apple', ja: 'りんご', level: 1 }, { en: 'orange', ja: 'オレンジ', level: 1 }, { en: 'cat', ja: '猫', level: 1 }, { en: 'dog', ja: '犬', level: 1 }, { en: 'play', ja: '遊ぶ', level: 1 }, { en: 'like', ja: '好き', level: 1 }, { en: 'have', ja: '持っている', level: 1 }, { en: 'go', ja: '行く', level: 1 }, { en: 'see', ja: '見る', level: 1 }, { en: 'come', ja: '来る', level: 1 }, { en: 'make', ja: '作る', level: 1 }, { en: 'get', ja: '得る', level: 1 }, { en: 'read', ja: '読む', level: 1 }, { en: 'write', ja: '書く', level: 1 }, { en: 'eat', ja: '食べる', level: 1 }, { en: 'drink', ja: '飲む', level: 1 }, { en: 'run', ja: '走る', level: 1 }, { en: 'walk', ja: '歩く', level: 1 }, { en: 'swim', ja: '泳ぐ', level: 1 }, { en: 'sing', ja: '歌う', level: 1 }, { en: 'dance', ja: '踊る', level: 1 },
+            { en: 'I', ja: '私は', level: 1, ex_en: 'I am a student.', ex_ja: '私は生徒です。' }, 
+            { en: 'you', ja: 'あなたは', level: 1, ex_en: 'You are my friend.', ex_ja: 'あなたは私の友達です。' }, 
+            { en: 'he', ja: '彼は', level: 1, ex_en: 'He plays soccer.', ex_ja: '彼はサッカーをします。' }, 
+            { en: 'she', ja: '彼女は', level: 1, ex_en: 'She likes cats.', ex_ja: '彼女は猫が好きです。' }, 
+            { en: 'it', ja: 'それは', level: 1, ex_en: 'It is a sunny day.', ex_ja: '今日は晴れです。' }, 
+            { en: 'we', ja: '私たちは', level: 1, ex_en: 'We go to school.', ex_ja: '私たちは学校に行きます。' }, 
+            { en: 'they', ja: '彼らは', level: 1, ex_en: 'They live in Tokyo.', ex_ja: '彼らは東京に住んでいます。' },
+            { en: 'this', ja: 'これは', level: 1, ex_en: 'This is a pen.', ex_ja: 'これはペンです。' },
+            { en: 'that', ja: 'あれは', level: 1, ex_en: 'That is my house.', ex_ja: 'あれは私の家です。' },
+            { en: 'play', ja: '遊ぶ', level: 1, ex_en: 'I play the piano.', ex_ja: '私はピアノを弾きます。' }, 
+            { en: 'like', ja: '好き', level: 1, ex_en: 'I like Japanese food.', ex_ja: '私は日本食が好きです。' }, 
+            { en: 'have', ja: '持っている', level: 1, ex_en: 'I have a dog.', ex_ja: '私は犬を飼っています。' }, 
+            { en: 'go', ja: '行く', level: 1, ex_en: 'I go to the library.', ex_ja: '私は図書館に行きます。' }, 
+            { en: 'see', ja: '見る', level: 1, ex_en: 'I see a bird.', ex_ja: '鳥が見えます。' },
+            { en: 'read', ja: '読む', level: 1, ex_en: 'I read a book every day.', ex_ja: '私は毎日、本を読みます。' },
 
             // 中2レベル (Level 2)
-            { en: 'will', ja: '〜だろう', level: 2 }, { en: 'be', ja: '〜になる', level: 2 }, { en: 'going', ja: 'つもり', level: 2 }, { en: 'to', ja: '〜すること', level: 2 }, { en: 'if', ja: 'もし〜なら', level: 2 }, { en: 'because', ja: 'なぜなら', level: 2 }, { en: 'when', ja: '〜するとき', level: 2 }, { en: 'that', ja: 'ということ', level: 2 }, { en: 'must', ja: '〜しなければならない', level: 2 }, { en: 'may', ja: '〜かもしれない', level: 2 }, { en: 'can', ja: '〜できる', level: 2 }, { en: 'enjoy', ja: '楽しむ', level: 2 }, { en: 'visit', ja: '訪れる', level: 2 }, { en: 'stay', ja: '滞在する', level: 2 }, { en: 'help', ja: '助ける', level: 2 }, { en: 'try', ja: '試す', level: 2 }, { en: 'stop', ja: 'やめる', level: 2 }, { en: 'start', ja: '始める', level: 2 }, { en: 'finish', ja: '終える', level: 2 }, { en: 'begin', ja: '始まる', level: 2 }, { en: 'work', ja: '働く', level: 2 }, { en: 'study', ja: '勉強する', level: 2 }, { en: 'learn', ja: '学ぶ', level: 2 }, { en: 'teach', ja: '教える', level: 2 }, { en: 'ask', ja: '尋ねる', level: 2 }, { en: 'answer', ja: '答える', level: 2 }, { en: 'talk', ja: '話す', level: 2 }, { en: 'speak', ja: '話す', level: 2 }, { en: 'listen', ja: '聞く', level: 2 }, { en: 'hear', ja: '聞こえる', level: 2 }, { en: 'feel', ja: '感じる', level: 2 }, { en: 'look', ja: '見る', level: 2 }, { en: 'find', ja: '見つける', level: 2 }, { en: 'think', ja: '思う', level: 2 }, { en: 'know', ja: '知っている', level: 2 }, { en: 'understand', ja: '理解する', level: 2 }, { en: 'believe', ja: '信じる', level: 2 }, { en: 'hope', ja: '望む', level: 2 }, { en: 'want', ja: '欲しい', level: 2 }, { en: 'need', ja: '必要とする', level: 2 }, { en: 'important', ja: '重要な', level: 2 }, { en: 'beautiful', ja: '美しい', level: 2 }, { en: 'famous', ja: '有名な', level: 2 }, { en: 'popular', ja: '人気のある', level: 2 }, { en: 'difficult', ja: '難しい', level: 2 },
+            { en: 'will', ja: '〜だろう', level: 2, ex_en: 'I will be a doctor.', ex_ja: '私は医者になるつもりです。' }, 
+            { en: 'enjoy', ja: '楽しむ', level: 2, ex_en: 'Did you enjoy the party?', ex_ja: 'パーティーは楽しかった？' },
+            { en: 'visit', ja: '訪れる', level: 2, ex_en: 'I want to visit Kyoto.', ex_ja: '私は京都を訪れたいです。' }, 
+            { en: 'important', ja: '重要な', level: 2, ex_en: 'English is important for us.', ex_ja: '英語は私たちにとって重要です。' },
+            { en: 'beautiful', ja: '美しい', level: 2, ex_en: 'This flower is beautiful.', ex_ja: 'この花は美しいです。' },
 
             // 中3レベル (Level 3)
-            { en: 'have', ja: '〜したことがある', level: 3 }, { en: 'been', ja: '（beの過去分詞）', level: 3 }, { en: 'done', ja: '（doの過去分詞）', level: 3 }, { en: 'seen', ja: '（seeの過去分詞）', level: 3 }, { en: 'made', ja: '（makeの過去分詞）', level: 3 }, { en: 'taken', ja: '（takeの過去分詞）', level: 3 }, { en: 'written', ja: '（writeの過去分詞）', level: 3 }, { en: 'read', ja: '（readの過去分詞）', level: 3 }, { en: 'spoken', ja: '（speakの過去分詞）', level: 3 }, { en: 'known', ja: '（knowの過去分詞）', level: 3 }, { en: 'which', ja: 'どちら', level: 3 }, { en: 'whose', ja: '誰の', level: 3 }, { en: 'who', ja: '（関係代名詞）', level: 3 }, { en: 'that', ja: '（関係代名詞）', level: 3 }, { en: 'to', ja: '（〜するために）', level: 3 }, { en: 'for', ja: '〜にとって', level: 3 }, { en: 'of', ja: '〜の', level: 3 }, { en: 'by', ja: '〜によって', level: 3 }, { en: 'with', ja: '〜と一緒に', level: 3 }, { en: 'about', ja: '〜について', level: 3 }, { en: 'government', ja: '政府', level: 3 }, { en: 'environment', ja: '環境', level: 3 }, { en: 'culture', ja: '文化', level: 3 }, { en: 'tradition', ja: '伝統', level: 3 }, { en: 'history', ja: '歴史', level: 3 }, { en: 'future', ja: '未来', level: 3 }, { en: 'science', ja: '科学', level: 3 }, { en: 'technology', ja: '技術', level: 3 }, { en: 'information', ja: '情報', level: 3 }, { en: 'communication', ja: 'コミュニケーション', level: 3 }, { en: 'international', ja: '国際的な', level: 3 }, { en: 'global', ja: '地球規模の', level: 3 }, { en: 'local', ja: '地元の', level: 3 }, { en: 'society', ja: '社会', level: 3 }, { en: 'problem', ja: '問題', level: 3 }, { en: 'solution', ja: '解決策', level: 3 }, { en: 'effort', ja: '努力', level: 3 }, { en: 'result', ja: '結果', level: 3 }, { en: 'experience', ja: '経験', level: 3 }, { en: 'knowledge', ja: '知識', level: 3 }, { en: 'peace', ja: '平和', level: 3 }, { en: 'war', ja: '戦争', level: 3 }, { en: 'life', ja: '生命', level: 3 }, { en: 'human', ja: '人間', level: 3 }, { en: 'nature', ja: '自然', level: 3 }
+            { en: 'experience', ja: '経験', level: 3, ex_en: 'It was a good experience.', ex_ja: 'それは良い経験でした。' },
+            { en: 'environment', ja: '環境', level: 3, ex_en: 'We must protect the environment.', ex_ja: '私たちは環境を守らなければなりません。' },
+            { en: 'culture', ja: '文化', level: 3, ex_en: 'I am interested in Japanese culture.', ex_ja: '私は日本の文化に興味があります。' },
+            { en: 'peace', ja: '平和', level: 3, ex_en: 'We all hope for world peace.', ex_ja: '私たちは皆、世界の平和を望んでいます。' }
         ];
+
+        // 足りない単語データを補完
+        const dummyWords = [
+            { en: 'am', ja: 'です', level: 1 }, { en: 'are', ja: 'です', level: 1 }, { en: 'is', ja: 'です', level: 1 }, { en: 'my', ja: '私の', level: 1 }, { en: 'your', ja: 'あなたの', level: 1 }, { en: 'his', ja: '彼の', level: 1 }, { en: 'her', ja: '彼女の', level: 1 }, { en: 'a', ja: '一つの', level: 1 }, { en: 'an', ja: '一つの', level: 1 }, { en: 'the', ja: 'その', level: 1 }, { en: 'not', ja: '〜ではない', level: 1 }, { en: 'what', ja: '何', level: 1 }, { en: 'who', ja: '誰', level: 1 }, { en: 'where', ja: 'どこ', level: 1 }, { en: 'when', ja: 'いつ', level: 1 }, { en: 'how', ja: 'どうやって', level: 1 }, { en: 'pen', ja: 'ペン', level: 1 }, { en: 'book', ja: '本', level: 1 }, { en: 'desk', ja: '机', level: 1 }, { en: 'bag', ja: 'かばん', level: 1 }, { en: 'note', ja: 'ノート', level: 1 }, { en: 'apple', ja: 'りんご', level: 1 }, { en: 'orange', ja: 'オレンジ', level: 1 }, { en: 'cat', ja: '猫', level: 1 }, { en: 'dog', ja: '犬', level: 1 }, { en: 'come', ja: '来る', level: 1 }, { en: 'make', ja: '作る', level: 1 }, { en: 'get', ja: '得る', level: 1 }, { en: 'write', ja: '書く', level: 1 }, { en: 'eat', ja: '食べる', level: 1 }, { en: 'drink', ja: '飲む', level: 1 }, { en: 'run', ja: '走る', level: 1 }, { en: 'walk', ja: '歩く', level: 1 }, { en: 'swim', ja: '泳ぐ', level: 1 }, { en: 'sing', ja: '歌う', level: 1 }, { en: 'dance', ja: '踊る', level: 1 },
+            { en: 'be', ja: '〜になる', level: 2 }, { en: 'going', ja: 'つもり', level: 2 }, { en: 'to', ja: '〜すること', level: 2 }, { en: 'if', ja: 'もし〜なら', level: 2 }, { en: 'because', ja: 'なぜなら', level: 2 }, { en: 'when', ja: '〜するとき', level: 2 }, { en: 'that', ja: 'ということ', level: 2 }, { en: 'must', ja: '〜しなければならない', level: 2 }, { en: 'may', ja: '〜かもしれない', level: 2 }, { en: 'can', ja: '〜できる', level: 2 }, { en: 'stay', ja: '滞在する', level: 2 }, { en: 'help', ja: '助ける', level: 2 }, { en: 'try', ja: '試す', level: 2 }, { en: 'stop', ja: 'やめる', level: 2 }, { en: 'start', ja: '始める', level: 2 }, { en: 'finish', ja: '終える', level: 2 }, { en: 'begin', ja: '始まる', level: 2 }, { en: 'work', ja: '働く', level: 2 }, { en: 'study', ja: '勉強する', level: 2 }, { en: 'learn', ja: '学ぶ', level: 2 }, { en: 'teach', ja: '教える', level: 2 }, { en: 'ask', ja: '尋ねる', level: 2 }, { en: 'answer', ja: '答える', level: 2 }, { en: 'talk', ja: '話す', level: 2 }, { en: 'speak', ja: '話す', level: 2 }, { en: 'listen', ja: '聞く', level: 2 }, { en: 'hear', ja: '聞こえる', level: 2 }, { en: 'feel', ja: '感じる', level: 2 }, { en: 'look', ja: '見る', level: 2 }, { en: 'find', ja: '見つける', level: 2 }, { en: 'think', ja: '思う', level: 2 }, { en: 'know', ja: '知っている', level: 2 }, { en: 'understand', ja: '理解する', level: 2 }, { en: 'believe', ja: '信じる', level: 2 }, { en: 'hope', ja: '望む', level: 2 }, { en: 'want', ja: '欲しい', level: 2 }, { en: 'need', ja: '必要とする', level: 2 }, { en: 'famous', ja: '有名な', level: 2 }, { en: 'popular', ja: '人気のある', level: 2 }, { en: 'difficult', ja: '難しい', level: 2 },
+            { en: 'have', ja: '〜したことがある', level: 3 }, { en: 'been', ja: '（beの過去分詞）', level: 3 }, { en: 'done', ja: '（doの過去分詞）', level: 3 }, { en: 'seen', ja: '（seeの過去分詞）', level: 3 }, { en: 'made', ja: '（makeの過去分詞）', level: 3 }, { en: 'taken', ja: '（takeの過去分詞）', level: 3 }, { en: 'written', ja: '（writeの過去分詞）', level: 3 }, { en: 'read', ja: '（readの過去分詞）', level: 3 }, { en: 'spoken', ja: '（speakの過去分詞）', level: 3 }, { en: 'known', ja: '（knowの過去分詞）', level: 3 }, { en: 'which', ja: 'どちら', level: 3 }, { en: 'whose', ja: '誰の', level: 3 }, { en: 'who', ja: '（関係代名詞）', level: 3 }, { en: 'that', ja: '（関係代名詞）', level: 3 }, { en: 'to', ja: '（〜するために）', level: 3 }, { en: 'for', ja: '〜にとって', level: 3 }, { en: 'of', ja: '〜の', level: 3 }, { en: 'by', ja: '〜によって', level: 3 }, { en: 'with', ja: '〜と一緒に', level: 3 }, { en: 'about', ja: '〜について', level: 3 }, { en: 'government', ja: '政府', level: 3 }, { en: 'tradition', ja: '伝統', level: 3 }, { en: 'history', ja: '歴史', level: 3 }, { en: 'future', ja: '未来', level: 3 }, { en: 'science', ja: '科学', level: 3 }, { en: 'technology', ja: '技術', level: 3 }, { en: 'information', ja: '情報', level: 3 }, { en: 'communication', ja: 'コミュニケーション', level: 3 }, { en: 'international', ja: '国際的な', level: 3 }, { en: 'global', ja: '地球規模の', level: 3 }, { en: 'local', ja: '地元の', level: 3 }, { en: 'society', ja: '社会', level: 3 }, { en: 'problem', ja: '問題', level: 3 }, { en: 'solution', ja: '解決策', level: 3 }, { en: 'effort', ja: '努力', level: 3 }, { en: 'result', ja: '結果', level: 3 }, { en: 'knowledge', ja: '知識', level: 3 }, { en: 'war', ja: '戦争', level: 3 }, { en: 'life', ja: '生命', level: 3 }, { en: 'human', ja: '人間', level: 3 }, { en: 'nature', ja: '自然', level: 3 }
+        ];
+        allWords.push(...dummyWords);
 
         // --- アプリケーションの状態管理 ---
         let currentQuiz = {
@@ -341,7 +365,7 @@
 
         function showResult() {
             document.getElementById('result-score').textContent = `${currentQuiz.score} / ${currentQuiz.words.length}`;
-            getEncouragementMessage(currentQuiz.score, currentQuiz.words.length);
+            showEncouragementMessage(currentQuiz.score, currentQuiz.words.length);
 
             const mistakesList = document.getElementById('mistakes-list');
             mistakesList.innerHTML = '';
@@ -357,7 +381,7 @@
                     const exampleBtn = document.createElement('button');
                     exampleBtn.textContent = '例文';
                     exampleBtn.className = "btn text-xs font-bold text-white bg-indigo-500 hover:bg-indigo-600 px-3 py-1 rounded-full shadow";
-                    exampleBtn.onclick = () => getExampleSentence(word);
+                    exampleBtn.onclick = () => showExampleSentence(word);
 
                     li.appendChild(wordInfo);
                     li.appendChild(exampleBtn);
@@ -371,94 +395,36 @@
             showScreen('result-screen');
         }
 
-        // --- Gemini API連携 ---
-        async function getExampleSentence(word) {
+        // --- 固定コンテンツ表示 ---
+        function showExampleSentence(word) {
             openModal('example-modal');
             document.getElementById('example-word-title').textContent = ` - ${word.en}`;
-            document.getElementById('example-loader').style.display = 'flex';
-            document.getElementById('example-text').style.display = 'none';
-
-            const apiKey = "";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-            const prompt = `あなたは、日本の中学生向けのフレンドリーな英語の先生です。
-提示された英単語を使って、シンプルで分かりやすい例文を作成してください。
-英語の例文と、その日本語訳を提供してください。
-出力は必ず以下の形式のJSONオブジェクトのみにしてください。前後に他のテキストは含めないでください。
-{"en": "英語の例文", "ja": "日本語訳"}
-
-英単語: "${word.en}"`;
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }]
-                    })
-                });
-                if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
-                
-                const result = await response.json();
-                const candidate = result.candidates?.[0];
-                const rawText = candidate?.content?.parts?.[0]?.text;
-                
-                if (!rawText) throw new Error("Invalid API response format: No text received.");
-
-                // AIの応答からJSON部分を抽出してパースする
-                const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-                if (!jsonMatch) throw new Error("Invalid API response format: No JSON object found in response.");
-                
-                const data = JSON.parse(jsonMatch[0]);
-
-                document.getElementById('example-en').textContent = data.en;
-                document.getElementById('example-ja').textContent = data.ja;
-
-            } catch (error) {
-                console.error("Gemini API Error:", error);
-                document.getElementById('example-en').textContent = 'エラーが発生しました。';
-                document.getElementById('example-ja').textContent = '時間をおいて再度お試しください。';
-            } finally {
-                document.getElementById('example-loader').style.display = 'none';
-                document.getElementById('example-text').style.display = 'block';
+            
+            if (word.ex_en && word.ex_ja) {
+                document.getElementById('example-en').textContent = word.ex_en;
+                document.getElementById('example-ja').textContent = word.ex_ja;
+            } else {
+                document.getElementById('example-en').textContent = 'この単語の例文は準備中です。';
+                document.getElementById('example-ja').textContent = '';
             }
         }
         
-        async function getEncouragementMessage(score, total) {
-            const resultMessageEl = document.getElementById('result-message');
-            resultMessageEl.textContent = 'AI先生からのメッセージを生成中...';
+        function showEncouragementMessage(score, total) {
+            const percentage = (score / total) * 100;
+            let messages;
 
-            const apiKey = "";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-            const systemPrompt = `あなたは日本の中学生向けの、明るくて優しい英語の先生です。生徒のやる気を引き出すような、ポジティブなフィードバックをしてください。`;
-            const userQuery = `生徒は${total}問中${score}問正解しました。結果に基づいて、日本の中学生に向けた、短くてポジティブな応援メッセージを日本語で生成してください。`;
-            
-            const fallbackMessage = () => {
-                 const p = (score / total) * 100;
-                 if (p === 100) resultMessageEl.textContent = '完璧！その調子で頑張ろう！';
-                 else if (p >= 80) resultMessageEl.textContent = 'すごい！もう一息だね！';
-                 else resultMessageEl.textContent = 'ナイスチャレンジ！次はもっとできる！';
-            };
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: userQuery }] }],
-                        systemInstruction: { parts: [{ text: systemPrompt }] }
-                    })
-                });
-                if (!response.ok) throw new Error("API Error");
-
-                const result = await response.json();
-                const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (text) resultMessageEl.textContent = text.trim();
-                else fallbackMessage();
-            } catch (error) {
-                console.error("Encouragement API Error:", error);
-                fallbackMessage();
+            if (percentage === 100) {
+                messages = ['完璧！すごい！この調子で頑張ろう！', '満点おめでとう！自信を持って次に進もう！', 'パーフェクト！素晴らしい集中力だね！'];
+            } else if (percentage >= 80) {
+                messages = ['素晴らしい！あと少しで完璧だね！', '高得点！よく頑張ったね！', 'すごい！間違えたところだけ確認しておこう。'];
+            } else if (percentage >= 50) {
+                messages = ['ナイスチャレンジ！半分以上できたね！', 'よく頑張ったね。復習が力になるよ！', 'お疲れ様！続けることが一番大事だよ！'];
+            } else {
+                messages = ['お疲れ様！まずは参加したことが素晴らしい！', 'ナイスファイト！ここからがスタートだ！', '間違えた単語は宝物だよ。しっかり復習しよう！'];
             }
+            
+            const message = messages[Math.floor(Math.random() * messages.length)];
+            document.getElementById('result-message').textContent = message;
         }
 
         // --- Firestoreとの連携 ---
@@ -468,7 +434,9 @@
 
         async function addMistake(word) {
             if (!userId) return;
-            try { await setDoc(doc(getMistakesCollectionRef(), word.en), word); }
+            // 例文データはDBに保存しない
+            const { ex_en, ex_ja, ...wordToSave } = word;
+            try { await setDoc(doc(getMistakesCollectionRef(), wordToSave.en), wordToSave); }
             catch (e) { console.error("Error adding document: ", e); }
         }
 
