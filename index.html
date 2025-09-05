@@ -116,9 +116,6 @@
                     <!-- 選択肢ボタンはJSで生成 -->
                 </div>
             </main>
-             <div id="feedback-overlay" class="hidden absolute inset-0 bg-black bg-opacity-30 flex justify-center items-center">
-                <div id="feedback-message" class="text-6xl font-bold text-white" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);"></div>
-            </div>
         </div>
 
         <!-- ===== 結果画面 ===== -->
@@ -139,6 +136,11 @@
                 <button onclick="showScreen('home-screen')" class="btn w-full text-lg font-bold text-slate-700 bg-slate-200 hover:bg-slate-300 p-4 rounded-xl shadow-md">ホームに戻る</button>
             </footer>
         </div>
+    </div>
+
+    <!-- ===== 正誤フィードバック表示 ===== -->
+    <div id="feedback-overlay" class="hidden fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-40 pointer-events-none">
+        <div id="feedback-message" class="text-8xl font-bold text-white" style="text-shadow: 3px 3px 6px rgba(0,0,0,0.7);"></div>
     </div>
 
     <!-- ===== 例文表示モーダル ===== -->
@@ -247,6 +249,12 @@
             const quizLength = Math.min(wordsForQuiz.length, 10);
             if(quizLength === 0) return;
 
+            // ★修正点：新しいクイズ開始時に前回の結果表示をリセット
+            document.getElementById('result-score').textContent = '';
+            document.getElementById('result-message').textContent = '';
+            document.getElementById('mistakes-list').innerHTML = '';
+            document.getElementById('mistakes-list-container').style.display = 'none';
+
             currentQuiz = {
                 words: wordsForQuiz.slice(0, quizLength),
                 currentWordIndex: 0,
@@ -304,13 +312,13 @@
             if (selectedChoice === correctChoice) {
                 currentQuiz.score++;
                 feedbackMessage.textContent = '正解！';
-                feedbackMessage.className = 'text-6xl font-bold text-green-400';
+                feedbackMessage.className = 'text-8xl font-bold text-green-400';
                 if (currentQuiz.level === 'mistakes') {
                     removeMistake(currentQuiz.words[currentQuiz.currentWordIndex]);
                 }
             } else {
                 feedbackMessage.textContent = '残念...';
-                feedbackMessage.className = 'text-6xl font-bold text-red-500';
+                feedbackMessage.className = 'text-8xl font-bold text-red-500';
                 const mistakenWord = currentQuiz.words[currentQuiz.currentWordIndex];
                 currentQuiz.mistakenWordsInQuiz.push(mistakenWord);
                 addMistake(mistakenWord);
