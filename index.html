@@ -381,38 +381,39 @@
             const apiKey = "";
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
-            const systemPrompt = `あなたは、日本の中学生向けのフレンドリーな英語の先生です。提示された英単語を使って、シンプルで分かりやすい例文を作成してください。英語の例文と、その日本語訳を提供してください。出力は必ず以下の形式のJSONオブジェクトにしてください: {"en": "英語の例文", "ja": "日本語訳"}`;
-            const userQuery = `英単語: "${word.en}"`;
+            const prompt = `あなたは、日本の中学生向けのフレンドリーな英語の先生です。
+提示された英単語を使って、シンプルで分かりやすい例文を作成してください。
+英語の例文と、その日本語訳を提供してください。
+出力は必ず以下の形式のJSONオブジェクトのみにしてください。前後に他のテキストは含めないでください。
+{"en": "英語の例文", "ja": "日本語訳"}
+
+英単語: "${word.en}"`;
 
             try {
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: userQuery }] }],
-                        systemInstruction: { parts: [{ text: systemPrompt }] },
-                        generationConfig: {
-                            responseMimeType: "application/json",
-                            responseSchema: {
-                                type: "OBJECT",
-                                properties: {
-                                    en: { type: "STRING" },
-                                    ja: { type: "STRING" }
-                                },
-                                required: ["en", "ja"]
-                            }
-                        }
+                        contents: [{ parts: [{ text: prompt }] }]
                     })
                 });
                 if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
                 
                 const result = await response.json();
                 const candidate = result.candidates?.[0];
-                if (!candidate?.content?.parts?.[0]?.text) throw new Error("Invalid API response format");
+                const rawText = candidate?.content?.parts?.[0]?.text;
+                
+                if (!rawText) throw new Error("Invalid API response format: No text received.");
 
-                const data = JSON.parse(candidate.content.parts[0].text);
+                // AIの応答からJSON部分を抽出してパースする
+                const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+                if (!jsonMatch) throw new Error("Invalid API response format: No JSON object found in response.");
+                
+                const data = JSON.parse(jsonMatch[0]);
+
                 document.getElementById('example-en').textContent = data.en;
                 document.getElementById('example-ja').textContent = data.ja;
+
             } catch (error) {
                 console.error("Gemini API Error:", error);
                 document.getElementById('example-en').textContent = 'エラーが発生しました。';
