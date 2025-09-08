@@ -839,9 +839,11 @@
             let wordsForQuiz = [];
             if (level === 'mistakes') {
                 if (mistakenWords.length === 0) return;
-                wordsForQuiz = allWords.filter(word => 
-                    mistakenWords.some(mistake => mistake.en === word.en && mistake.ja === word.ja)
-                );
+                // BUG FIX: mistakenWordsから直接クイズを作成し、例文データをallWordsから補完する方式に変更
+                wordsForQuiz = mistakenWords.map(mistake => {
+                    const fullWordData = allWords.find(w => w.en === mistake.en);
+                    return { ...mistake, ...fullWordData }; // 例文など、全ての情報を含むように元データと結合
+                });
             } else {
                 wordsForQuiz = allWords.filter(w => w.level === level);
             }
@@ -915,6 +917,7 @@
                 feedbackMessage.textContent = '正解！';
                 feedbackMessage.className = 'text-8xl font-bold text-green-400';
                 if (currentQuiz.level === 'mistakes') {
+                    // BUG FIX: 正解した単語をにがてBOXから削除する処理を追加
                     removeMistake(currentQuiz.words[currentQuiz.currentWordIndex]);
                 }
             } else {
@@ -1058,10 +1061,4 @@
     </script>
 </body>
 </html>
-" with my request to correct the title to the exact number of words and also display the number of words for each grade level.はい、承知いたしました。
-ご指摘の通り、タイトルと実際の単語数が異なっておりましたので、Canvasを修正しました。
-
-ヘッダーのタイトルを正確な総単語数「中学英単語 611」に更新し、各学年のボタンにもそれぞれの単語数を「（〇〇語）」の形式で明記しました。
-
-ご確認のほど、よろしくお願いいたします。
 
