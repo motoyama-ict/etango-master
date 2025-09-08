@@ -95,9 +95,6 @@
                     <span id="mistake-count" class="text-sm font-normal text-rose-100">0語</span>
                 </button>
             </main>
-            <footer class="text-center text-xs text-slate-400 mt-8">
-                <p>ユーザーID: <span id="user-id-display"></span></p>
-            </footer>
         </div>
 
         <!-- ===== クイズ画面 ===== -->
@@ -159,11 +156,7 @@
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, collection, getDocs, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
+    <script>
         // --- 単語データ ---
         const allWords = [
             // ========== 中1レベル (Level 1) ==========
@@ -790,34 +783,56 @@
             level: null
         };
         let mistakenWords = [];
-        let db, auth, userId;
 
-        // --- Firebase初期化 ---
-        async function initializeFirebase() {
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-            const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-            const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
+        // --- ローカルストレージ連携 ---
+        const MISTAKES_STORAGE_KEY = 'etango-mistakenWords';
 
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    userId = user.uid;
-                    document.getElementById('user-id-display').textContent = userId.substring(0, 8) + '...';
-                    setupMistakesListener();
-                    updateProgress();
-                } else {
-                    try {
-                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                            await signInWithCustomToken(auth, __initial_auth_token);
-                        } else {
-                            await signInAnonymously(auth);
-                        }
-                    } catch (error) {
-                        console.error("Authentication failed: ", error);
-                    }
-                }
-            });
+        function loadMistakesFromLocalStorage() {
+            const savedData = localStorage.getItem(MISTAKES_STORAGE_KEY);
+            if (savedData) {
+                mistakenWords = JSON.parse(savedData);
+            } else {
+                mistakenWords = [];
+            }
+            updateMistakeCount();
+            updateProgress();
+        }
+
+        function saveMistakesToLocalStorage() {
+            localStorage.setItem(MISTAKES_STORAGE_KEY, JSON.stringify(mistakenWords));
+        }
+
+        function addMistake(word) {
+            // 既にリストになければ追加する
+            if (!mistakenWords.some(m => m.en === word.en)) {
+                const { ex_en, ex_ja, ...wordToSave } = word;
+                mistakenWords.push(wordToSave);
+                saveMistakesToLocalStorage();
+                updateMistakeCount();
+                updateProgress();
+            }
+        }
+
+        function removeMistake(word) {
+            mistakenWords = mistakenWords.filter(m => m.en !== word.en);
+            saveMistakesToLocalStorage();
+            updateMistakeCount();
+            updateProgress();
+        }
+
+        function updateMistakeCount() {
+            const count = mistakenWords.length;
+            document.getElementById('mistake-count').textContent = `${count}語`;
+            document.getElementById('mistakes-btn').disabled = (count === 0);
+        }
+
+        function updateProgress() {
+            const mistakenEnWords = new Set(mistakenWords.map(w => w.en));
+            for(let level = 1; level <= 3; level++){
+                const levelWords = allWords.filter(w => w.level === level);
+                const learnedCount = levelWords.filter(w => !mistakenEnWords.has(w.en)).length;
+                document.getElementById(`progress-${level}`).textContent = `達成度: ${learnedCount} / ${levelWords.length}`;
+            }
         }
         
         // --- 画面・モーダル制御 ---
@@ -839,10 +854,9 @@
             let wordsForQuiz = [];
             if (level === 'mistakes') {
                 if (mistakenWords.length === 0) return;
-                // BUG FIX: mistakenWordsから直接クイズを作成し、例文データをallWordsから補完する方式に変更
                 wordsForQuiz = mistakenWords.map(mistake => {
                     const fullWordData = allWords.find(w => w.en === mistake.en);
-                    return { ...mistake, ...fullWordData }; // 例文など、全ての情報を含むように元データと結合
+                    return { ...mistake, ...fullWordData }; 
                 });
             } else {
                 wordsForQuiz = allWords.filter(w => w.level === level);
@@ -917,7 +931,6 @@
                 feedbackMessage.textContent = '正解！';
                 feedbackMessage.className = 'text-8xl font-bold text-green-400';
                 if (currentQuiz.level === 'mistakes') {
-                    // BUG FIX: 正解した単語をにがてBOXから削除する処理を追加
                     removeMistake(currentQuiz.words[currentQuiz.currentWordIndex]);
                 }
             } else {
@@ -1007,56 +1020,12 @@
             document.getElementById('result-message').textContent = message;
         }
 
-        // --- Firestoreとの連携 ---
-        function getMistakesCollectionRef() {
-            return collection(db, 'artifacts', typeof __app_id !== 'undefined' ? __app_id : 'default-app-id', 'users', userId, 'mistakenWords');
-        }
-
-        async function addMistake(word) {
-            if (!userId) return;
-            const { ex_en, ex_ja, ...wordToSave } = word;
-            try { await setDoc(doc(getMistakesCollectionRef(), wordToSave.en), wordToSave); }
-            catch (e) { console.error("Error adding document: ", e); }
-        }
-
-        async function removeMistake(word) {
-            if (!userId) return;
-            try { await deleteDoc(doc(getMistakesCollectionRef(), word.en)); }
-            catch (e) { console.error("Error removing document: ", e); }
-        }
-        
-        function setupMistakesListener() {
-            if (!userId) return;
-            onSnapshot(getMistakesCollectionRef(), (snapshot) => {
-                mistakenWords = snapshot.docs.map(doc => doc.data());
-                updateMistakeCount();
-            });
-        }
-        
-        function updateMistakeCount() {
-            const count = mistakenWords.length;
-            document.getElementById('mistake-count').textContent = `${count}語`;
-            document.getElementById('mistakes-btn').disabled = (count === 0);
-        }
-
-        async function updateProgress() {
-            if(!userId) return;
-            try {
-                const snapshot = await getDocs(getMistakesCollectionRef());
-                const mistakenEnWords = new Set(snapshot.docs.map(doc => doc.id));
-                for(let level = 1; level <=3; level++){
-                    const levelWords = allWords.filter(w => w.level === level);
-                    const learnedCount = levelWords.filter(w => !mistakenEnWords.has(w.en)).length;
-                    document.getElementById(`progress-${level}`).textContent = `達成度: ${learnedCount} / ${levelWords.length}`;
-                }
-            } catch(e) { console.error("Error fetching progress: ", e); }
-        }
-
         // --- 初期化処理 ---
         window.onload = () => {
-            initializeFirebase();
+            loadMistakesFromLocalStorage();
             window.showScreen = showScreen;
             window.closeModal = closeModal;
+            window.startQuiz = startQuiz;
         };
     </script>
 </body>
