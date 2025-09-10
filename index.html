@@ -77,23 +77,25 @@
                 <h1 class="text-3xl font-bold text-sky-600">英単語マスター</h1>
                 <p class="text-slate-500 mt-1">中学英単語 611</p>
             </header>
-            <main class="flex-grow space-y-4 flex flex-col justify-center">
-                <button onclick="startQuiz(1)" class="btn w-full text-lg font-bold text-white bg-sky-500 hover:bg-sky-600 p-4 rounded-xl shadow-md">
-                    <span class="block">中学1年生レベル (184語)</span>
-                    <span id="progress-1" class="text-sm font-normal text-sky-100"></span>
-                </button>
-                <button onclick="startQuiz(2)" class="btn w-full text-lg font-bold text-white bg-teal-500 hover:bg-teal-600 p-4 rounded-xl shadow-md">
-                    <span class="block">中学2年生レベル (184語)</span>
-                    <span id="progress-2" class="text-sm font-normal text-teal-100"></span>
-                </button>
-                <button onclick="startQuiz(3)" class="btn w-full text-lg font-bold text-white bg-amber-500 hover:bg-amber-600 p-4 rounded-xl shadow-md">
-                    <span class="block">中学3年生レベル (243語)</span>
-                     <span id="progress-3" class="text-sm font-normal text-amber-100"></span>
-                </button>
-                <button onclick="startQuiz('mistakes')" id="mistakes-btn" class="btn w-full text-lg font-bold text-white bg-rose-500 hover:bg-rose-600 p-4 rounded-xl shadow-md mt-6 disabled:bg-slate-400 disabled:cursor-not-allowed">
-                    <span class="block">にがてBOXから出題</span>
-                    <span id="mistake-count" class="text-sm font-normal text-rose-100">0語</span>
-                </button>
+            <main class="flex-grow flex flex-col justify-center">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button onclick="startQuiz(1)" class="btn w-full text-lg font-bold text-white bg-sky-500 hover:bg-sky-600 p-4 rounded-xl shadow-md">
+                        <span class="block">中学1年生レベル (184語)</span>
+                        <span id="progress-1" class="text-sm font-normal text-sky-100"></span>
+                    </button>
+                    <button onclick="startQuiz(2)" class="btn w-full text-lg font-bold text-white bg-teal-500 hover:bg-teal-600 p-4 rounded-xl shadow-md">
+                        <span class="block">中学2年生レベル (184語)</span>
+                        <span id="progress-2" class="text-sm font-normal text-teal-100"></span>
+                    </button>
+                    <button onclick="startQuiz(3)" class="btn w-full text-lg font-bold text-white bg-amber-500 hover:bg-amber-600 p-4 rounded-xl shadow-md">
+                        <span class="block">中学3年生レベル (243語)</span>
+                         <span id="progress-3" class="text-sm font-normal text-amber-100"></span>
+                    </button>
+                    <button onclick="startQuiz('mistakes')" id="mistakes-btn" class="btn w-full text-lg font-bold text-white bg-rose-500 hover:bg-rose-600 p-4 rounded-xl shadow-md disabled:bg-slate-400 disabled:cursor-not-allowed">
+                        <span class="block">にがてBOXから出題</span>
+                        <span id="mistake-count" class="text-sm font-normal text-rose-100">0語</span>
+                    </button>
+                </div>
             </main>
         </div>
 
